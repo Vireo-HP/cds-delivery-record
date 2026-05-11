@@ -398,7 +398,7 @@ body {
 
   <div class="pf-header">
     <div>
-      <div class="pf-title">Controlled Drug Substance — Daily Delivery Record</div>
+      <div class="pf-title">Controlled Drug Substance — Dispensing & Administration Record</div>
       <div class="pf-regs">HPOA Bylaws Sch. E.14 · PODSA Bylaws s.35.1–35.6 · RS26-010</div>
     </div>
     <div>
@@ -653,7 +653,7 @@ function generateLog() {
 
   const headers = ['Date', 'Dose', 'Witness'];
   if (hasCarry) headers.push('Carry');
-  headers.push('Total', 'Delivery Address', 'Time', 'Driver Init.', 'Pharm. Init.', 'Patient Init.');
+  headers.push('Total', 'Time', 'Driver Init.', 'Pharm. Init.', 'Patient Init.');
 
   const trH = document.createElement('tr');
   headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; trH.appendChild(th); });
@@ -670,7 +670,6 @@ function generateLog() {
     if (hasCarry) cells.push({ text: r.carry || '—', cls: 'td-pre' });
     cells.push(
       { text: r.total, cls: 'td-pre' },
-      { text: addr,    cls: 'td-pre td-addr' },
       { text: '',      cls: '' },
       { text: '',      cls: '' },
       { text: '',      cls: '' },
