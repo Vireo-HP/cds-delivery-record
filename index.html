@@ -25,7 +25,7 @@ body {
   width: 40px; height: 40px; background: #2d6a4f;
   border-radius: 10px; display: flex; align-items: center; justify-content: center;
 }
-.app-title { font-size: 17px; font-weight: 700; }
+.app-title   { font-size: 17px; font-weight: 700; }
 .app-subtitle { font-size: 11px; color: #95d5b2; margin-top: 2px; }
 .app-badge {
   background: #40916c; color: #d8f3dc;
@@ -56,7 +56,7 @@ body {
 
 /* ── Fields ───────────────────────────────────────────────────────────────── */
 .fields { padding: 0 26px 6px; }
-.fg { display: grid; gap: 12px; margin-bottom: 0; }
+.fg { display: grid; gap: 12px; }
 .fg.c2 { grid-template-columns: 1fr 1fr; }
 .fg.c3 { grid-template-columns: 1fr 1fr 1fr; }
 .fg + .fg { margin-top: 12px; }
@@ -109,21 +109,6 @@ body {
 }
 .split-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* ── Date Chips ───────────────────────────────────────────────────────────── */
-.chip-section { padding: 0 26px 6px; }
-.chip-note-top { font-size: 11.5px; color: #6c757d; margin-bottom: 8px; }
-.chip-legend { display: flex; gap: 14px; margin-bottom: 8px; font-size: 11px; color: #6c757d; }
-.chip-legend span { display: flex; align-items: center; gap: 4px; }
-.ldot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.chip-grid { display: flex; flex-wrap: wrap; gap: 5px; }
-.chip {
-  padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 600;
-  cursor: pointer; user-select: none; transition: all 0.15s; border: 1.5px solid transparent;
-}
-.chip.delivery { background: #d8f3dc; color: #1b4332; border-color: #95d5b2; }
-.chip.carry     { background: #f2f2f2; color: #aaa; text-decoration: line-through; border-color: #e0e0e0; }
-.chip-note { font-size: 11px; color: #6c757d; margin-top: 6px; }
-
 /* ── Action Area ──────────────────────────────────────────────────────────── */
 .action-area {
   padding: 18px 26px 24px; border-top: 1px solid #eef2ee; background: #fafcfa;
@@ -156,24 +141,22 @@ body {
   overflow: hidden;
 }
 
-/* Form header bar */
+/* Header bar */
 .pf-header {
   background: #1b4332; padding: 13px 20px;
   display: flex; justify-content: space-between; align-items: center;
 }
-.pf-title { font-size: 14px; font-weight: 700; color: #fff; }
-.pf-regs  { font-size: 9.5px; color: #95d5b2; margin-top: 2px; }
+.pf-title   { font-size: 14px; font-weight: 700; color: #fff; }
+.pf-regs    { font-size: 9.5px; color: #95d5b2; margin-top: 2px; }
 .pf-pharmacy-name    { font-size: 12px; font-weight: 700; color: #fff; text-align: right; }
 .pf-pharmacy-contact { font-size: 9.5px; color: #95d5b2; text-align: right; margin-top: 2px; }
 
-/* Summary block */
+/* Summary strip */
 .pf-summary {
   display: grid; grid-template-columns: repeat(5, 1fr);
   border-bottom: 2px solid #1b4332;
 }
-.pf-sum-cell {
-  padding: 7px 14px; border-right: 1px solid #e8f5ee;
-}
+.pf-sum-cell { padding: 7px 14px; border-right: 1px solid #e8f5ee; }
 .pf-sum-cell:last-child { border-right: none; }
 .sum-label { font-size: 9px; font-weight: 700; color: #40916c; text-transform: uppercase; letter-spacing: 0.6px; }
 .sum-value { font-size: 12px; font-weight: 700; color: #1a1a1a; margin-top: 2px; }
@@ -204,13 +187,13 @@ body {
   padding: 0; height: 21px; border: 1px solid #ccc;
   text-align: center; vertical-align: middle; font-size: 10.5px;
 }
-.td-date { background: #f0faf4 !important; font-weight: 600; font-size: 10px; width: 62px; }
+.td-date { background: #f0faf4 !important; font-weight: 600; font-size: 10px; width: 70px; }
 .td-pre  { background: #f8fcf8; color: #1a1a1a; font-weight: 500; }
-.td-sig  { min-width: 70px; }
 .td-wit  { background: #fffde7 !important; }
-.log-table tr:nth-child(even) td { background: #fafcfa; }
-.log-table tr:nth-child(even) td.td-date { background: #e8f5ee; }
-.log-table tr:nth-child(even) td.td-wit  { background: #fffde7; }
+.td-addr { font-size: 9px !important; max-width: 110px; }
+.log-table tr:nth-child(even) td             { background: #fafcfa; }
+.log-table tr:nth-child(even) td.td-date     { background: #e8f5ee; }
+.log-table tr:nth-child(even) td.td-wit      { background: #fffde7; }
 
 /* Form footer */
 .pf-footer {
@@ -232,8 +215,6 @@ body {
   .log-table { font-size: 9px; }
   .log-table th { font-size: 7.5px; }
   .log-table td { height: 17px; }
-  .pf-summary { grid-template-columns: repeat(5, 1fr); }
-  .pf-info    { grid-template-columns: repeat(4, 1fr); }
 }
 </style>
 </head>
@@ -355,7 +336,7 @@ body {
         <label class="day-check" id="dc-0"><input type="checkbox" value="0" checked onchange="syncDay(this)"> Sun</label>
       </div>
       <div class="witness-hint">
-        In Custom mode, the log shows <strong>witness days only</strong>. Carry doses are bundled into each witness row (carry amount = daily dose × number of carry days since last witness).
+        In Custom mode, the log shows <strong>witness days only</strong>. Carry doses are bundled into each witness row — carry amount = daily dose × number of carry days until the next witness day.
       </div>
     </div>
 
@@ -372,36 +353,25 @@ body {
           <input type="text" id="pmDose" placeholder="e.g. 4.5" oninput="onSplitChange()">
         </div>
       </div>
-      <div class="witness-hint" id="splitCalc" style="margin-top:8px">
-        In Split dose mode, every delivery day appears. The log shows AM witnessed + PM carry on each row.
+      <div class="witness-hint" id="splitCalc">
+        In Split dose mode, every delivery day appears in the log with AM (witnessed) and PM (carry) pre-filled.
       </div>
     </div>
   </div>
 
   <!-- PRESCRIPTION PERIOD -->
   <div class="section-sep"><span>Prescription Period</span></div>
-  <div class="fields">
+  <div class="fields" style="padding-bottom:20px">
     <div class="fg c2">
       <div class="field">
         <label>Start Date <span class="req">*</span></label>
-        <input type="date" id="startDate" onchange="buildChips()">
+        <input type="date" id="startDate">
       </div>
       <div class="field">
         <label>End Date <span class="req">*</span></label>
-        <input type="date" id="endDate" onchange="buildChips()">
+        <input type="date" id="endDate">
       </div>
     </div>
-  </div>
-
-  <!-- DATE CHIPS -->
-  <div class="chip-section" id="chipSection" style="display:none">
-    <div class="chip-note-top">Click any date to toggle it as a carry/rest day (excluded from log)</div>
-    <div class="chip-legend">
-      <span><span class="ldot" style="background:#95d5b2;border:1px solid #40916c"></span> Delivery day</span>
-      <span><span class="ldot" style="background:#e0e0e0;border:1px solid #ccc"></span> Carry / rest (excluded)</span>
-    </div>
-    <div class="chip-grid" id="chipGrid"></div>
-    <div class="chip-note">Excluded dates will not appear as rows in the printed log.</div>
   </div>
 
   <!-- ACTION -->
@@ -409,7 +379,7 @@ body {
     <div class="workflow-hint">
       <strong>Step 1</strong> Fill all required fields &nbsp;·&nbsp;
       <strong>Step 2</strong> Generate Log &nbsp;·&nbsp;
-      <strong>Step 3</strong> Print &nbsp;—&nbsp; turn <strong>OFF</strong> Headers and footers in the print dialog
+      <strong>Step 3</strong> Print — turn <strong>OFF</strong> Headers and footers in the print dialog
     </div>
     <div class="btn-row">
       <button class="btn-generate" onclick="generateLog()">Generate Log</button>
@@ -426,7 +396,6 @@ body {
 <div id="print-form">
 <div class="pf-inner">
 
-  <!-- Header bar -->
   <div class="pf-header">
     <div>
       <div class="pf-title">Controlled Drug Substance — Daily Delivery Record</div>
@@ -438,7 +407,6 @@ body {
     </div>
   </div>
 
-  <!-- Summary strip -->
   <div class="pf-summary">
     <div class="pf-sum-cell"><div class="sum-label">Rx Number</div><div class="sum-value" id="sRx">—</div></div>
     <div class="pf-sum-cell"><div class="sum-label">Start Date</div><div class="sum-value" id="sStart">—</div></div>
@@ -447,15 +415,13 @@ body {
     <div class="pf-sum-cell"><div class="sum-label">Total Dispensed</div><div class="sum-value" id="sTotal">—</div></div>
   </div>
 
-  <!-- Patient info grid -->
   <div class="pf-info">
     <div class="pf-info-cell"><div class="info-lbl">Patient Name</div><div class="info-val" id="fPatName">—</div></div>
     <div class="pf-info-cell"><div class="info-lbl">Date of Birth</div><div class="info-val" id="fPatDOB">—</div></div>
     <div class="pf-info-cell"><div class="info-lbl">Delivery Address</div><div class="info-val" id="fPatAddr">—</div></div>
-    <div class="pf-info-cell"><div class="info-lbl">Witnessing</div><div class="info-val" id="fWitness">—</div></div>
+    <div class="pf-info-cell"><div class="info-lbl">Witnessing Pattern</div><div class="info-val" id="fWitness">—</div></div>
   </div>
 
-  <!-- Log table -->
   <div class="pf-table-wrap">
     <div class="log-table-title">Delivery Log</div>
     <table class="log-table">
@@ -464,7 +430,6 @@ body {
     </table>
   </div>
 
-  <!-- Footer -->
   <div class="pf-footer">
     <p>
       <strong>Chain of custody:</strong> Retain this record at the pharmacy for ≥ 2 years. Loss or theft must be reported to the College of Pharmacists of BC within 24 h and to Health Canada within 10 business days (RS26-010 s.14).&nbsp;&nbsp;
@@ -477,7 +442,8 @@ body {
 </div><!-- /print-form -->
 
 <div class="page-footer">
-  Vireo Health CDS Delivery Log Generator &nbsp;·&nbsp; Questions? <a href="mailto:ramihanania@protonmail.com">ramihanania@protonmail.com</a> · 604-355-2377
+  Vireo Health CDS Delivery Log Generator &nbsp;·&nbsp;
+  <a href="mailto:ramihanania@protonmail.com">ramihanania@protonmail.com</a> &nbsp;·&nbsp; 604-355-2377
 </div>
 </main>
 
@@ -485,7 +451,27 @@ body {
 /* ── State ───────────────────────────────────────────────────────────────── */
 let unit        = 'mg';
 let witnessMode = '';
-let chips       = []; // {date, label, dayOfWeek, carry}
+
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+function fmt(n) {
+  if (isNaN(n)) return '—';
+  return Number.isInteger(n) ? n.toString() : parseFloat(n.toFixed(2)).toString();
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return M[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
+}
+
+function fmtDateShort(d) {
+  // d is a Date object — returns dd/mm/yyyy
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return dd + '/' + mm + '/' + yyyy;
+}
 
 /* ── Unit toggle ─────────────────────────────────────────────────────────── */
 function setUnit(u) {
@@ -494,8 +480,8 @@ function setUnit(u) {
   document.getElementById('unitMl').classList.toggle('active', u === 'mL');
 }
 
-/* ── Dose change → update split calc hint ────────────────────────────────── */
-function onDoseChange() { if (witnessMode === 'split') onSplitChange(); }
+/* ── Dose / split helpers ────────────────────────────────────────────────── */
+function onDoseChange() { /* nothing extra needed */ }
 
 function onSplitChange() {
   const am  = parseFloat(document.getElementById('amDose').value) || 0;
@@ -503,91 +489,43 @@ function onSplitChange() {
   const tot = am + pm;
   const el  = document.getElementById('splitCalc');
   if (am > 0 && pm > 0) {
-    el.innerHTML = `Daily total: <strong>${fmt(tot)} ${unit}</strong> (${fmt(am)} witnessed + ${fmt(pm)} carry). Every delivery day appears in the log.`;
     document.getElementById('cdsDose').value = fmt(tot);
+    el.innerHTML = `Daily total: <strong>${fmt(tot)} ${unit}</strong> (${fmt(am)} AM witnessed + ${fmt(pm)} PM carry). Every delivery day appears in the log.`;
   } else {
-    el.textContent = 'In Split dose mode, every delivery day appears. The log shows AM witnessed + PM carry on each row.';
+    el.textContent = 'In Split dose mode, every delivery day appears in the log with AM (witnessed) and PM (carry) pre-filled.';
   }
 }
 
-function fmt(n) { return Number.isInteger(n) ? n.toString() : parseFloat(n.toFixed(2)).toString(); }
-
-/* ── Witnessing pattern change ───────────────────────────────────────────── */
+/* ── Witnessing pattern ──────────────────────────────────────────────────── */
 function onWitnessChange() {
   witnessMode = document.getElementById('witnessSelect').value;
   document.getElementById('subCustom').style.display = witnessMode === 'custom' ? 'block' : 'none';
   document.getElementById('subSplit').style.display  = witnessMode === 'split'  ? 'block' : 'none';
-  if (witnessMode === 'split') {
-    document.getElementById('cdsDose').placeholder = 'Auto (AM + PM)';
-    document.getElementById('cdsDose').readOnly = false;
-  } else {
-    document.getElementById('cdsDose').placeholder = 'e.g. 80';
-    document.getElementById('cdsDose').readOnly = false;
-  }
-  renderChips();
 }
 
-/* ── Day checkbox styling ────────────────────────────────────────────────── */
 function syncDay(cb) {
   cb.closest('.day-check').classList.toggle('unchecked', !cb.checked);
-  renderChips();
 }
 
-function witnessedDays() {
+function witnessedDOW() {
   return Array.from(document.querySelectorAll('#dayChecks input:checked')).map(i => parseInt(i.value));
 }
 
-/* ── Date chips ──────────────────────────────────────────────────────────── */
-function buildChips() {
-  const s = document.getElementById('startDate').value;
-  const e = document.getElementById('endDate').value;
-  if (!s || !e || s > e) { document.getElementById('chipSection').style.display = 'none'; chips = []; return; }
-
-  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  chips = [];
-  for (let d = new Date(s + 'T00:00:00'); d <= new Date(e + 'T00:00:00'); d.setDate(d.getDate()+1)) {
-    chips.push({
-      date:      d.toISOString().slice(0,10),
-      label:     DAYS[d.getDay()] + ' ' + MONTHS[d.getMonth()] + ' ' + d.getDate(),
-      dayOfWeek: d.getDay(),
-      carry:     false
-    });
+/* ── Build date list from start→end ─────────────────────────────────────── */
+function allDates(startISO, endISO) {
+  const dates = [];
+  for (let d = new Date(startISO + 'T00:00:00'); d <= new Date(endISO + 'T00:00:00'); d.setDate(d.getDate()+1)) {
+    dates.push(new Date(d));
   }
-  renderChips();
-  document.getElementById('chipSection').style.display = 'block';
+  return dates;
 }
 
-function renderChips() {
-  const grid = document.getElementById('chipGrid');
-  grid.innerHTML = '';
-  chips.forEach((c, i) => {
-    const el = document.createElement('div');
-    el.className = 'chip ' + (c.carry ? 'carry' : 'delivery');
-    el.textContent = c.label;
-    el.title = c.carry ? 'Restore as delivery day' : 'Mark as carry/rest day';
-    el.onclick = () => { chips[i].carry = !chips[i].carry; renderChips(); };
-    grid.appendChild(el);
-  });
-}
-
-/* ── Date formatting ─────────────────────────────────────────────────────── */
-function fmtDate(iso) {
-  if (!iso) return '—';
-  const [y,m,d] = iso.split('-');
-  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return M[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
-}
-
-/* ── Build log rows depending on mode ────────────────────────────────────── */
-function buildRows(doseNum, witnessMode, amDoseNum, pmDoseNum) {
-  // deliveryChips = chips not marked carry
-  const deliverable = chips.filter(c => !c.carry);
+/* ── Build log rows ──────────────────────────────────────────────────────── */
+function buildRows(dates, doseNum, amDoseNum, pmDoseNum) {
 
   if (witnessMode === 'all') {
-    // Every deliverable day = witnessed
-    return deliverable.map(c => ({
-      dateLabel: c.label,
+    return dates.map(d => ({
+      dateLabel: fmtDateShort(d),
       dose:      fmt(doseNum) + ' ' + unit,
       witness:   fmt(doseNum) + ' ' + unit,
       carry:     null,
@@ -596,9 +534,8 @@ function buildRows(doseNum, witnessMode, amDoseNum, pmDoseNum) {
   }
 
   if (witnessMode === 'split') {
-    // Every deliverable day, AM + PM
-    return deliverable.map(c => ({
-      dateLabel: c.label,
+    return dates.map(d => ({
+      dateLabel: fmtDateShort(d),
       dose:      fmt(amDoseNum) + '+' + fmt(pmDoseNum) + ' ' + unit,
       witness:   fmt(amDoseNum) + ' ' + unit,
       carry:     fmt(pmDoseNum) + ' ' + unit,
@@ -607,97 +544,60 @@ function buildRows(doseNum, witnessMode, amDoseNum, pmDoseNum) {
   }
 
   if (witnessMode === 'custom') {
-    const wDays = witnessedDays(); // array of day-of-week numbers that are witnessed
-    // Build rows: only witness-day deliveries appear; carry days bundled into previous witness row
+    const wDOW = witnessedDOW();
     const rows = [];
-    let pendingCarryCount = 0;
-    let pendingCarryDates = [];
 
-    deliverable.forEach((c, idx) => {
-      const isWitnessed = wDays.includes(c.dayOfWeek);
-      if (isWitnessed) {
-        // First flush any leading carries (carry days before any witness day in the period)
-        if (rows.length === 0 && pendingCarryCount > 0) {
-          // These carries have no preceding witness — add them as a carry-only row
-          rows.push({
-            dateLabel: pendingCarryDates[0] + (pendingCarryDates.length > 1 ? ' – ' + pendingCarryDates[pendingCarryDates.length-1] : '') + ' (carry)',
-            dose:      fmt(doseNum) + ' ' + unit,
-            witness:   '—',
-            carry:     fmt(doseNum * pendingCarryCount) + ' ' + unit,
-            total:     fmt(doseNum * pendingCarryCount) + ' ' + unit,
-          });
-          pendingCarryCount = 0;
-          pendingCarryDates = [];
-        }
-        // Now look ahead: how many carry days follow this witness day?
-        let carryAfter = 0;
-        let carryDates = [];
-        for (let j = idx + 1; j < deliverable.length; j++) {
-          if (!wDays.includes(deliverable[j].dayOfWeek)) {
-            carryAfter++;
-            carryDates.push(deliverable[j].label);
-          } else {
-            break;
-          }
-        }
-        const hasCarry = pendingCarryCount > 0 || carryAfter > 0;
-        const totalCarryCount = pendingCarryCount + carryAfter;
-        const carryAmt = totalCarryCount * doseNum;
+    // Walk through dates; on each witness day, count how many carry days follow
+    // until the next witness day (or end of period)
+    for (let i = 0; i < dates.length; i++) {
+      const dow = dates[i].getDay();
+      if (!wDOW.includes(dow)) continue; // skip non-witness days — they get bundled
 
-        rows.push({
-          dateLabel: c.label,
-          dose:      fmt(doseNum) + ' ' + unit,
-          witness:   fmt(doseNum) + ' ' + unit,
-          carry:     hasCarry ? fmt(carryAmt) + ' ' + unit : null,
-          total:     fmt(doseNum + carryAmt) + ' ' + unit,
-        });
-        pendingCarryCount = 0;
-        pendingCarryDates = [];
-      } else {
-        // Accumulate leading carries
-        if (rows.length === 0) {
-          pendingCarryCount++;
-          pendingCarryDates.push(c.label);
-        }
-        // Mid-period carry days are bundled into look-ahead above — skip here
+      // Count carry days that follow this witness day
+      let carryCount = 0;
+      for (let j = i + 1; j < dates.length; j++) {
+        if (wDOW.includes(dates[j].getDay())) break; // next witness day — stop
+        carryCount++;
       }
-    });
 
-    // Any trailing carries (after last witness day) — add as a row
-    if (pendingCarryCount > 0 && rows.length === 0) {
+      const carryAmt = doseNum * carryCount;
+      const totalAmt = doseNum + carryAmt;
+
       rows.push({
-        dateLabel: 'Carry only',
+        dateLabel: fmtDateShort(dates[i]),
         dose:      fmt(doseNum) + ' ' + unit,
-        witness:   '—',
-        carry:     fmt(doseNum * pendingCarryCount) + ' ' + unit,
-        total:     fmt(doseNum * pendingCarryCount) + ' ' + unit,
+        witness:   fmt(doseNum) + ' ' + unit,
+        carry:     carryCount > 0 ? fmt(carryAmt) + ' ' + unit + ' (' + carryCount + 'd)' : null,
+        total:     fmt(totalAmt) + ' ' + unit,
       });
     }
-
     return rows;
   }
 
   return [];
 }
 
-/* ── Generate Log ─────────────────────────────────────────────────────────── */
+/* ── Generate Log ────────────────────────────────────────────────────────── */
 function generateLog() {
-  // Validate
-  const required = [
+  // Required fields
+  const req = [
     ['pharmName','Pharmacy Name'], ['patName','Patient Name'],
-    ['patDOB','Date of Birth'], ['patRx','Rx Number'],
-    ['patAddr','Delivery Address'], ['cdsName','CDS Name'],
-    ['startDate','Start Date'], ['endDate','End Date'],
+    ['patDOB','Date of Birth'],    ['patRx','Rx Number'],
+    ['patAddr','Delivery Address'],['cdsName','CDS Name'],
+    ['startDate','Start Date'],    ['endDate','End Date'],
   ];
-  for (const [id, label] of required) {
+  for (const [id, label] of req) {
     if (!document.getElementById(id).value.trim()) {
       alert('Please fill in: ' + label); document.getElementById(id).focus(); return;
     }
   }
   if (!witnessMode) { alert('Please select a Witnessing Pattern.'); return; }
 
-  let doseNum = parseFloat(document.getElementById('cdsDose').value);
-  let amDoseNum = 0, pmDoseNum = 0;
+  const startISO = document.getElementById('startDate').value;
+  const endISO   = document.getElementById('endDate').value;
+  if (startISO > endISO) { alert('End Date must be on or after Start Date.'); return; }
+
+  let doseNum = 0, amDoseNum = 0, pmDoseNum = 0;
 
   if (witnessMode === 'split') {
     amDoseNum = parseFloat(document.getElementById('amDose').value) || 0;
@@ -705,54 +605,60 @@ function generateLog() {
     if (!amDoseNum || !pmDoseNum) { alert('Please enter both AM and PM doses for Split dose mode.'); return; }
     doseNum = amDoseNum + pmDoseNum;
   } else {
+    doseNum = parseFloat(document.getElementById('cdsDose').value) || 0;
     if (!doseNum) { alert('Please enter a valid Daily Dose.'); return; }
   }
 
-  if (chips.length === 0) { alert('Please enter a valid date range.'); return; }
-  const deliverable = chips.filter(c => !c.carry);
-  if (deliverable.length === 0) { alert('All dates are excluded. Please restore at least one delivery day.'); return; }
+  if (witnessMode === 'custom' && witnessedDOW().length === 0) {
+    alert('Please select at least one witnessed weekday.'); return;
+  }
 
-  // Build rows
-  const rows = buildRows(doseNum, witnessMode, amDoseNum, pmDoseNum);
-  const hasCarryCol = rows.some(r => r.carry !== null);
-
-  // Totals
-  const totalDays = deliverable.length;
+  const dates = allDates(startISO, endISO);
+  const totalDays = dates.length;
   const totalDispensed = fmt(doseNum * totalDays) + ' ' + unit;
 
-  // ── Populate summary strip ──
+  // Build rows
+  const rows = buildRows(dates, doseNum, amDoseNum, pmDoseNum);
+  if (rows.length === 0) {
+    alert('No witness days found in this date range with the selected pattern. Please adjust your witnessing days or date range.'); return;
+  }
+  const hasCarry = rows.some(r => r.carry !== null);
+
+  // ── Summary strip ──
   document.getElementById('fPharmName').textContent    = document.getElementById('pharmName').value.trim();
   const ph = document.getElementById('pharmPhone').value.trim();
   const pa = document.getElementById('pharmAddr').value.trim();
   document.getElementById('fPharmContact').textContent = [ph, pa].filter(Boolean).join(' · ') || '—';
   document.getElementById('sRx').textContent    = document.getElementById('patRx').value.trim();
-  document.getElementById('sStart').textContent = fmtDate(document.getElementById('startDate').value);
+  document.getElementById('sStart').textContent = fmtDate(startISO);
   document.getElementById('sDays').textContent  = totalDays;
   document.getElementById('sDose').textContent  = fmt(doseNum) + ' ' + unit + '/day';
   document.getElementById('sTotal').textContent = totalDispensed;
 
-  // ── Populate patient info ──
+  // ── Patient info ──
   document.getElementById('fPatName').textContent = document.getElementById('patName').value.trim();
   document.getElementById('fPatDOB').textContent  = fmtDate(document.getElementById('patDOB').value);
   document.getElementById('fPatAddr').textContent = document.getElementById('patAddr').value.trim();
-  const wLabels = { all: 'All days witnessed', custom: 'Custom (selected weekdays)', split: 'Split dose (AM witnessed + PM carry)' };
+  const wLabels = {
+    all:    'All days witnessed (Mon–Sun)',
+    custom: 'Custom (' + witnessedDOW().map(n => ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][n]).join(', ') + ')',
+    split:  'Split dose (' + fmt(amDoseNum) + ' AM + ' + fmt(pmDoseNum) + ' PM ' + unit + ')',
+  };
   document.getElementById('fWitness').textContent = wLabels[witnessMode] || '—';
 
-  // ── Build table ──
+  // ── Table ──
   const head = document.getElementById('logHead');
   const body = document.getElementById('logBody');
   head.innerHTML = ''; body.innerHTML = '';
 
-  // Headers
   const headers = ['Date', 'Dose', 'Witness'];
-  if (hasCarryCol) headers.push('Carry');
-  headers.push('Total', 'Delivery Address', 'Time', 'Pharm. Init.', 'Patient Init.');
+  if (hasCarry) headers.push('Carry');
+  headers.push('Total', 'Delivery Address', 'Time', 'Driver Init.', 'Pharm. Init.', 'Patient Init.');
 
   const trH = document.createElement('tr');
   headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; trH.appendChild(th); });
   head.appendChild(trH);
 
-  // Body rows
   const addr = document.getElementById('patAddr').value.trim();
   rows.forEach(r => {
     const tr = document.createElement('tr');
@@ -761,25 +667,25 @@ function generateLog() {
       { text: r.dose,      cls: 'td-pre' },
       { text: r.witness,   cls: 'td-pre td-wit' },
     ];
-    if (hasCarryCol) cells.push({ text: r.carry || '—', cls: 'td-pre' });
+    if (hasCarry) cells.push({ text: r.carry || '—', cls: 'td-pre' });
     cells.push(
       { text: r.total, cls: 'td-pre' },
-      { text: addr,    cls: 'td-pre', small: true },
+      { text: addr,    cls: 'td-pre td-addr' },
       { text: '',      cls: '' },
       { text: '',      cls: '' },
-      { text: '',      cls: 'td-sig' },
+      { text: '',      cls: '' },
+      { text: '',      cls: '' },
     );
     cells.forEach(c => {
       const td = document.createElement('td');
       td.textContent = c.text;
-      if (c.cls) c.cls.split(' ').forEach(cl => cl && td.classList.add(cl));
-      if (c.small) { td.style.fontSize = '9px'; td.style.maxWidth = '100px'; }
+      c.cls.split(' ').filter(Boolean).forEach(cl => td.classList.add(cl));
       tr.appendChild(td);
     });
     body.appendChild(tr);
   });
 
-  // Show preview
+  // Show
   document.getElementById('print-form').classList.add('show');
   document.getElementById('printBtn').classList.add('show');
   document.getElementById('previewNotice').classList.add('show');
