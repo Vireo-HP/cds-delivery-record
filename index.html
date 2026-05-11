@@ -3,519 +3,638 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CDS Daily Delivery Record</title>
+<title>CDS Delivery Log Generator – Vireo Health</title>
 <style>
-  /* ── Reset & Base ─────────────────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 14px; color: #1a1a1a; background: #f0f4f0; }
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-size: 14px; color: #1a1a1a; background: #f2f5f2; min-height: 100vh;
+}
 
-  /* ── Screen Layout ────────────────────────────────────────────────────── */
-  .screen-wrapper { display: flex; gap: 24px; padding: 24px; min-height: 100vh; }
+/* ── App Shell ────────────────────────────────────────────────────────────── */
+.app-header {
+  background: #1b4332; color: #fff;
+  padding: 18px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.app-header-left { display: flex; align-items: center; gap: 14px; }
+.app-icon {
+  width: 42px; height: 42px; background: #2d6a4f;
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.app-title { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
+.app-subtitle { font-size: 12px; color: #95d5b2; margin-top: 2px; }
+.app-badge {
+  background: #40916c; color: #d8f3dc;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+  padding: 4px 12px; border-radius: 20px; text-transform: uppercase;
+}
 
-  /* Setup panel */
-  .setup-panel {
-    width: 380px; flex-shrink: 0;
-    background: #fff; border-radius: 10px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-    padding: 24px; height: fit-content;
-    position: sticky; top: 24px;
-  }
-  .setup-panel h1 {
-    font-size: 16px; font-weight: 700; color: #1b4332;
-    margin-bottom: 4px; letter-spacing: 0.3px;
-  }
-  .setup-panel .subtitle {
-    font-size: 12px; color: #6c757d; margin-bottom: 20px;
-  }
-  .section-label {
-    font-size: 11px; font-weight: 700; color: #40916c;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    margin: 18px 0 8px; border-bottom: 1px solid #d8f3dc; padding-bottom: 4px;
-  }
-  .field { margin-bottom: 10px; }
-  .field label { display: block; font-size: 12px; font-weight: 600; color: #444; margin-bottom: 3px; }
-  .field input, .field select {
-    width: 100%; padding: 7px 10px; border: 1.5px solid #ddd;
-    border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif;
-    color: #1a1a1a; background: #fafafa; transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus {
-    outline: none; border-color: #40916c; background: #fff;
-  }
-  .field-row { display: flex; gap: 10px; }
-  .field-row .field { flex: 1; }
+/* ── Main Content ─────────────────────────────────────────────────────────── */
+.main { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
 
-  /* Toggle switch for witnessed ingestion */
-  .toggle-row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
-  .toggle-row label { font-size: 12px; font-weight: 600; color: #444; flex: 1; }
-  .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .slider {
-    position: absolute; cursor: pointer; inset: 0;
-    background: #ccc; border-radius: 24px; transition: 0.2s;
-  }
-  .slider::before {
-    content: ""; position: absolute; height: 18px; width: 18px;
-    left: 3px; bottom: 3px; background: white;
-    border-radius: 50%; transition: 0.2s;
-  }
-  .toggle input:checked + .slider { background: #40916c; }
-  .toggle input:checked + .slider::before { transform: translateX(20px); }
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.card {
+  background: #fff; border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
 
-  /* Date selector */
-  .date-grid {
-    display: flex; flex-wrap: wrap; gap: 4px;
-    margin-top: 8px; max-height: 200px;
-    overflow-y: auto; padding: 4px;
-  }
-  .date-chip {
-    padding: 4px 8px; border-radius: 5px; font-size: 11px;
-    cursor: pointer; border: 1.5px solid #40916c;
-    background: #d8f3dc; color: #1b4332; font-weight: 600;
-    transition: all 0.12s; user-select: none; white-space: nowrap;
-  }
-  .date-chip.skipped {
-    background: #f0f0f0; border-color: #ccc; color: #aaa;
-    text-decoration: line-through; font-weight: 400;
-  }
-  .date-chip:hover { opacity: 0.8; }
-  .date-hint { font-size: 11px; color: #888; margin-top: 5px; }
+/* ── Section Separator ────────────────────────────────────────────────────── */
+.section-sep {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 28px 10px;
+}
+.section-sep span {
+  font-size: 10.5px; font-weight: 700; color: #40916c;
+  text-transform: uppercase; letter-spacing: 1px; white-space: nowrap;
+}
+.section-sep::after {
+  content: ""; flex: 1; height: 1px; background: #d8f3dc;
+}
 
-  /* Buttons */
-  .btn-print {
-    width: 100%; padding: 11px; margin-top: 20px;
-    background: #1b4332; color: #fff; border: none;
-    border-radius: 7px; font-size: 14px; font-weight: 700;
-    cursor: pointer; letter-spacing: 0.3px; transition: background 0.15s;
-  }
-  .btn-print:hover { background: #40916c; }
-  .btn-print:disabled { background: #aaa; cursor: not-allowed; }
+/* ── Form Fields ──────────────────────────────────────────────────────────── */
+.fields { padding: 0 28px 8px; }
+.field-grid { display: grid; gap: 14px; }
+.field-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.field-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
-  /* Preview panel */
-  .preview-panel { flex: 1; }
-  .preview-label {
-    font-size: 11px; font-weight: 700; color: #6c757d;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    margin-bottom: 10px;
-  }
-  .form-paper {
-    background: #fff; box-shadow: 0 2px 16px rgba(0,0,0,0.12);
-    border-radius: 6px; padding: 28px 32px; min-height: 600px;
-  }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 12px; font-weight: 600; color: #555; letter-spacing: 0.2px;
+}
+.field label .req { color: #c05c2e; margin-left: 2px; }
+.field input, .field select {
+  padding: 9px 12px;
+  border: 1.5px solid #dde3dd;
+  border-radius: 7px;
+  font-size: 13px; font-family: inherit; color: #1a1a1a; background: #fafcfa;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input:focus, .field select:focus {
+  outline: none; border-color: #40916c;
+  box-shadow: 0 0 0 3px rgba(64,145,108,0.12);
+  background: #fff;
+}
+.field input::placeholder { color: #aaa; }
 
-  /* ── FORM STYLES (printed) ────────────────────────────────────────────── */
-  .form-header-bar {
-    background: #1b4332; color: #fff;
-    padding: 10px 16px; margin: -28px -32px 16px;
-    border-radius: 6px 6px 0 0;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .form-header-bar .form-title {
-    font-size: 13px; font-weight: 700; letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-  .form-header-bar .form-ref {
-    font-size: 9px; color: #b7e4c7; text-align: right; line-height: 1.4;
-  }
+/* Unit toggle (mg / mL) */
+.unit-group { display: flex; gap: 0; }
+.unit-group button {
+  flex: 1; padding: 9px 0; font-size: 13px; font-weight: 600;
+  border: 1.5px solid #dde3dd; background: #fafcfa; color: #555;
+  cursor: pointer; transition: all 0.15s;
+}
+.unit-group button:first-child { border-radius: 7px 0 0 7px; border-right: none; }
+.unit-group button:last-child  { border-radius: 0 7px 7px 0; }
+.unit-group button.active { background: #1b4332; color: #fff; border-color: #1b4332; }
 
-  .info-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 0; border: 1px solid #ccc; margin-bottom: 12px;
-    border-radius: 4px; overflow: hidden;
-  }
-  .info-cell {
-    padding: 5px 10px; border-bottom: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0; font-size: 11px;
-  }
-  .info-cell:nth-child(even) { border-right: none; }
-  .info-cell.full { grid-column: 1 / -1; border-right: none; }
-  .info-cell .lbl { font-size: 9px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 1px; }
-  .info-cell .val { font-size: 12px; font-weight: 600; color: #1a1a1a; min-height: 14px; }
-  .info-cell.header-cell { background: #f7faf8; }
+/* Witnessing radio rows */
+.witness-options { display: flex; flex-direction: column; gap: 8px; padding: 0 28px 6px; }
+.witness-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border: 1.5px solid #dde3dd; border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; background: #fafcfa;
+}
+.witness-option:hover { border-color: #40916c; background: #f0faf4; }
+.witness-option.selected { border-color: #40916c; background: #f0faf4; }
+.witness-option input[type=radio] { accent-color: #1b4332; width: 16px; height: 16px; cursor: pointer; }
+.witness-option .opt-label { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+.witness-option .opt-desc  { font-size: 11.5px; color: #6c757d; margin-top: 1px; }
 
-  .wi-badge {
-    display: inline-block; padding: 2px 8px; border-radius: 10px;
-    font-size: 10px; font-weight: 700; margin-left: 8px;
-  }
-  .wi-badge.yes { background: #d8f3dc; color: #1b4332; }
-  .wi-badge.no  { background: #f0f0f0; color: #888; }
+/* Date chips */
+.chip-section { padding: 0 28px 6px; }
+.chip-label { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 8px; }
+.chip-legend {
+  display: flex; gap: 16px; margin-bottom: 10px; font-size: 11px; color: #6c757d;
+}
+.chip-legend span { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; user-select: none; transition: all 0.15s;
+  border: 1.5px solid transparent;
+}
+.chip.delivery  { background: #d8f3dc; color: #1b4332; border-color: #95d5b2; }
+.chip.carry     { background: #f2f2f2; color: #aaa; text-decoration: line-through; border-color: #e0e0e0; }
+.chip-note { font-size: 11px; color: #6c757d; margin-top: 8px; }
 
-  /* Delivery log table */
-  .log-table {
-    width: 100%; border-collapse: collapse;
-    font-size: 10px; margin-bottom: 14px;
-  }
-  .log-table th {
-    background: #1b4332; color: #fff;
-    padding: 5px 4px; text-align: center;
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.3px; border: 1px solid #1b4332;
-    line-height: 1.2;
-  }
-  .log-table td {
-    border: 1px solid #ccc; padding: 0 3px;
-    text-align: center; height: 24px; vertical-align: middle;
-  }
-  .log-table tr:nth-child(even) td { background: #f8fcf9; }
-  .log-table .td-date { text-align: left; padding-left: 5px; font-weight: 600; font-size: 10px; white-space: nowrap; }
-  .log-table .td-sig { text-align: left; }
-  .log-table .td-check { font-size: 13px; }
+/* ── Workflow / Action Area ────────────────────────────────────────────────── */
+.action-area {
+  padding: 20px 28px 28px;
+  border-top: 1px solid #eef2ee;
+  background: #fafcfa;
+}
+.workflow-hint {
+  font-size: 12px; color: #6c757d; margin-bottom: 14px; text-align: center;
+  letter-spacing: 0.1px;
+}
+.workflow-hint strong { color: #40916c; }
+.btn-row { display: flex; gap: 12px; justify-content: center; }
 
-  /* Form footer */
-  .form-footer {
-    border-top: 1px solid #ddd; padding-top: 8px; margin-top: 4px;
-  }
-  .form-footer p {
-    font-size: 9px; color: #666; line-height: 1.5; margin-bottom: 3px;
-  }
-  .form-footer strong { color: #1b4332; }
+.btn-generate {
+  background: #1b4332; color: #fff;
+  border: none; border-radius: 8px;
+  padding: 12px 36px; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  letter-spacing: 0.3px;
+}
+.btn-generate:hover { background: #2d6a4f; }
+.btn-generate:active { transform: scale(0.98); }
 
-  .empty-state {
-    text-align: center; padding: 60px 20px; color: #aaa; font-size: 13px;
-  }
-  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+.btn-print {
+  background: #40916c; color: #fff;
+  border: none; border-radius: 8px;
+  padding: 12px 36px; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+  display: none; letter-spacing: 0.3px;
+}
+.btn-print:hover { background: #52b788; }
+.btn-print:active { transform: scale(0.98); }
+.btn-print.visible { display: inline-block; }
 
-  /* ── PRINT STYLES ─────────────────────────────────────────────────────── */
-  @media print {
-    body { background: #fff; font-size: 11px; }
-    .screen-wrapper { display: block; padding: 0; }
-    .setup-panel, .preview-label { display: none !important; }
-    .preview-panel { display: block; }
-    .form-paper {
-      box-shadow: none; border-radius: 0;
-      padding: 14mm 14mm 10mm;
-      min-height: unset;
-    }
-    .form-header-bar {
-      margin: -14mm -14mm 10px;
-      border-radius: 0; padding: 8px 14mm;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .form-header-bar .form-title { font-size: 11px; }
-    .info-cell { padding: 4px 8px; }
-    .log-table th {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .log-table tr:nth-child(even) td {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-      background: #f8fcf9 !important;
-    }
-    .log-table td { height: 20px; }
-    .btn-print { display: none; }
-    @page { size: letter portrait; margin: 0; }
+/* ── Preview Badge ────────────────────────────────────────────────────────── */
+.preview-notice {
+  display: none; text-align: center; margin: 8px 0 0;
+  font-size: 12px; color: #6c757d;
+}
+.preview-notice.visible { display: block; }
+
+/* ── Print Form ───────────────────────────────────────────────────────────── */
+#print-form { display: none; }
+#print-form.visible { display: block; }
+
+.print-form-inner {
+  margin-top: 28px; background: #fff; border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* Form header */
+.form-header {
+  background: #1b4332; padding: 14px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.form-header-left .form-title { font-size: 15px; font-weight: 700; color: #fff; }
+.form-header-left .form-regs  { font-size: 10px; color: #95d5b2; margin-top: 3px; }
+.form-header-right { text-align: right; }
+.form-header-right .pharmacy-name { font-size: 13px; font-weight: 700; color: #fff; }
+.form-header-right .pharmacy-contact { font-size: 10px; color: #95d5b2; margin-top: 2px; }
+
+/* Info grid */
+.form-info-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; border-bottom: 1px solid #d8f3dc;
+}
+.info-cell {
+  padding: 8px 16px; border-right: 1px solid #eef2ee;
+  border-bottom: 1px solid #eef2ee;
+}
+.info-cell:nth-child(2n) { border-right: none; }
+.info-label { font-size: 9.5px; font-weight: 700; color: #40916c; text-transform: uppercase; letter-spacing: 0.6px; }
+.info-value { font-size: 12px; font-weight: 600; color: #1a1a1a; margin-top: 2px; }
+
+/* Log table */
+.log-table-wrap { padding: 14px 16px 0; }
+.log-table-title {
+  font-size: 10px; font-weight: 700; color: #40916c;
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
+}
+.log-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.log-table th {
+  background: #1b4332; color: #fff; font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 6px 5px; text-align: center; border: 1px solid #2d6a4f;
+}
+.log-table td {
+  padding: 0; height: 22px; border: 1px solid #ccc;
+  text-align: center; vertical-align: middle; font-size: 11px; color: #1a1a1a;
+}
+.log-table td.date-col { background: #f0faf4; font-weight: 600; width: 54px; }
+.log-table tr:nth-child(even) td { background: #fafcfa; }
+.log-table tr:nth-child(even) td.date-col { background: #e8f5ee; }
+.sig-cell { min-width: 80px; }
+.witness-col { background: #fffde7 !important; }
+
+/* Form footer */
+.form-footer {
+  margin: 10px 16px 14px; padding: 8px 12px;
+  background: #f0faf4; border-radius: 6px;
+  border-left: 3px solid #40916c;
+}
+.form-footer p { font-size: 9.5px; color: #2d6a4f; line-height: 1.5; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.page-footer {
+  text-align: center; padding: 28px 16px; font-size: 11px; color: #aaa;
+}
+
+/* ── Print Media ──────────────────────────────────────────────────────────── */
+@media print {
+  body { background: #fff; font-size: 11px; }
+  .app-header, .main > .card, .action-area, .preview-notice, .page-footer { display: none !important; }
+  #print-form { display: block !important; }
+  .print-form-inner {
+    margin: 0; border-radius: 0; box-shadow: none;
+    page-break-inside: avoid;
   }
+  .form-info-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .info-cell:nth-child(2n) { border-right: 1px solid #eef2ee; }
+  .info-cell:nth-child(4n) { border-right: none; }
+  .log-table { font-size: 9px; }
+  .log-table th { font-size: 8px; }
+  .log-table td { height: 18px; }
+}
 </style>
 </head>
 <body>
 
-<div class="screen-wrapper">
+<!-- ── App Header ─────────────────────────────────────────────────────────── -->
+<header class="app-header">
+  <div class="app-header-left">
+    <div class="app-icon">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M13 3C13 3 7 8 7 14C7 17.3137 9.68629 20 13 20C16.3137 20 19 17.3137 19 14C19 8 13 3 13 3Z" fill="#95d5b2"/>
+        <path d="M13 8C13 8 9.5 12 9.5 15C9.5 16.933 11.067 18.5 13 18.5C14.933 18.5 16.5 16.933 16.5 15C16.5 12 13 8 13 8Z" fill="#d8f3dc"/>
+        <line x1="13" y1="20" x2="13" y2="24" stroke="#95d5b2" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="app-title">CDS Delivery Log Generator</div>
+      <div class="app-subtitle">HPOA Sch. E.14 · PODSA s.35.1–35.6 · RS26-010 compliant</div>
+    </div>
+  </div>
+  <div class="app-badge">Vireo Health</div>
+</header>
 
-  <!-- ══ SETUP PANEL ══════════════════════════════════════════════════════ -->
-  <div class="setup-panel" id="setupPanel">
-    <h1>CDS Delivery Record</h1>
-    <p class="subtitle">Fill in details below, then print the form for the driver.</p>
+<!-- ── Main ───────────────────────────────────────────────────────────────── -->
+<main class="main">
+  <div class="card">
 
     <!-- Pharmacy -->
-    <div class="section-label">Pharmacy Information</div>
-    <div class="field"><label>Pharmacy Name</label>
-      <input type="text" id="pharmName" placeholder="e.g. Main Street Pharmacy" oninput="render()"></div>
-    <div class="field"><label>Address</label>
-      <input type="text" id="pharmAddress" placeholder="123 Main St, Vancouver, BC" oninput="render()"></div>
-    <div class="field"><label>Phone Number</label>
-      <input type="text" id="pharmPhone" placeholder="604-000-0000" oninput="render()"></div>
+    <div class="section-sep"><span>Pharmacy</span></div>
+    <div class="fields">
+      <div class="field-grid cols-2">
+        <div class="field">
+          <label>Pharmacy Name <span class="req">*</span></label>
+          <input type="text" id="pharmName" placeholder="e.g. Maple Ridge Pharmacy">
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="tel" id="pharmPhone" placeholder="e.g. 604-555-0100">
+        </div>
+      </div>
+      <div class="field-grid" style="margin-top:14px">
+        <div class="field">
+          <label>Pharmacy Address</label>
+          <input type="text" id="pharmAddr" placeholder="e.g. 123 Main St, Maple Ridge, BC V2X 1A1">
+        </div>
+      </div>
+    </div>
 
     <!-- Patient -->
-    <div class="section-label">Patient Information</div>
-    <div class="field"><label>Patient Full Name</label>
-      <input type="text" id="patientName" placeholder="Last, First" oninput="render()"></div>
-    <div class="field-row">
-      <div class="field"><label>Date of Birth</label>
-        <input type="date" id="patientDOB" oninput="render()"></div>
+    <div class="section-sep"><span>Patient</span></div>
+    <div class="fields">
+      <div class="field-grid cols-3">
+        <div class="field">
+          <label>Patient Name <span class="req">*</span></label>
+          <input type="text" id="patName" placeholder="Last, First">
+        </div>
+        <div class="field">
+          <label>Date of Birth <span class="req">*</span></label>
+          <input type="date" id="patDOB">
+        </div>
+        <div class="field">
+          <label>Rx Number <span class="req">*</span></label>
+          <input type="text" id="patRx" placeholder="e.g. 1234567">
+        </div>
+      </div>
+      <div class="field-grid" style="margin-top:14px">
+        <div class="field">
+          <label>Delivery Address <span class="req">*</span></label>
+          <input type="text" id="patAddr" placeholder="e.g. 456 Oak Ave, Maple Ridge, BC V2X 2B2">
+        </div>
+      </div>
     </div>
-    <div class="field"><label>Delivery Address</label>
-      <input type="text" id="deliveryAddress" placeholder="Street address, City, BC" oninput="render()"></div>
 
     <!-- CDS -->
-    <div class="section-label">Controlled Drug Substance</div>
-    <div class="field"><label>CDS Name</label>
-      <input type="text" id="cdsName" placeholder="e.g. Methadone" oninput="render()"></div>
-    <div class="field"><label>Dose</label>
-      <input type="text" id="cdsDose" placeholder="e.g. 80 mg / 50 mL" oninput="render()"></div>
+    <div class="section-sep"><span>Controlled Drug Substance</span></div>
+    <div class="fields">
+      <div class="field-grid cols-3">
+        <div class="field">
+          <label>CDS Name <span class="req">*</span></label>
+          <input type="text" id="cdsName" placeholder="e.g. Methadone">
+        </div>
+        <div class="field">
+          <label>Daily Dose <span class="req">*</span></label>
+          <input type="text" id="cdsDose" placeholder="e.g. 80">
+        </div>
+        <div class="field">
+          <label>Unit</label>
+          <div class="unit-group">
+            <button id="unitMg" class="active" onclick="setUnit('mg')">mg</button>
+            <button id="unitMl" onclick="setUnit('mL')">mL</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <div class="toggle-row" style="margin-top:14px;">
-      <label>Witnessed Ingestion Required</label>
-      <label class="toggle">
-        <input type="checkbox" id="wiToggle" onchange="render()">
-        <span class="slider"></span>
+    <!-- Witnessing Pattern -->
+    <div class="section-sep"><span>Witnessed Ingestion</span></div>
+    <div class="witness-options">
+      <label class="witness-option selected" id="wo-all">
+        <input type="radio" name="witness" value="all" checked onchange="updateWitness(this)">
+        <div>
+          <div class="opt-label">All delivery days — pharmacist-witnessed ingestion required</div>
+          <div class="opt-desc">Virtual (video) or in-person witnessing by pharmacist on every delivery day</div>
+        </div>
+      </label>
+      <label class="witness-option" id="wo-some">
+        <input type="radio" name="witness" value="some" onchange="updateWitness(this)">
+        <div>
+          <div class="opt-label">Supervised consumption days only (carries on other days)</div>
+          <div class="opt-desc">Witnessed column shown for consumption days; carry days marked accordingly</div>
+        </div>
+      </label>
+      <label class="witness-option" id="wo-none">
+        <input type="radio" name="witness" value="none" onchange="updateWitness(this)">
+        <div>
+          <div class="opt-label">No witnessed ingestion required</div>
+          <div class="opt-desc">Standard CDS delivery without observation requirement</div>
+        </div>
       </label>
     </div>
 
-    <!-- Dates -->
-    <div class="section-label">Prescription Period</div>
-    <div class="field-row">
-      <div class="field"><label>Start Date</label>
-        <input type="date" id="startDate" onchange="buildDates()"></div>
-      <div class="field"><label>End Date</label>
-        <input type="date" id="endDate" onchange="buildDates()"></div>
-    </div>
-
-    <div id="dateSelector" style="display:none;">
-      <div class="date-hint">Click a date to mark it as a carry / rest day (grey = skipped).</div>
-      <div class="date-grid" id="dateGrid"></div>
-      <div class="date-hint" id="dateCount" style="margin-top:8px;"></div>
-    </div>
-
-    <button class="btn-print" onclick="window.print()" id="printBtn" disabled>
-      🖨 Print Delivery Record
-    </button>
-  </div>
-
-  <!-- ══ PREVIEW PANEL ════════════════════════════════════════════════════ -->
-  <div class="preview-panel">
-    <div class="preview-label">Form Preview — updates as you type</div>
-    <div class="form-paper" id="formPaper">
-      <div class="empty-state">
-        <div class="icon">📋</div>
-        <div>Fill in the setup panel to generate the delivery record.</div>
+    <!-- Prescription Period -->
+    <div class="section-sep"><span>Prescription Period</span></div>
+    <div class="fields">
+      <div class="field-grid cols-2">
+        <div class="field">
+          <label>Start Date <span class="req">*</span></label>
+          <input type="date" id="startDate" onchange="buildChips()">
+        </div>
+        <div class="field">
+          <label>End Date <span class="req">*</span></label>
+          <input type="date" id="endDate" onchange="buildChips()">
+        </div>
       </div>
     </div>
+
+    <!-- Date chips -->
+    <div class="chip-section" id="chipSection" style="display:none">
+      <div class="chip-label">Delivery Schedule — click any date to toggle carry/rest day</div>
+      <div class="chip-legend">
+        <span><span class="legend-dot" style="background:#95d5b2;border:1.5px solid #40916c"></span> Delivery day</span>
+        <span><span class="legend-dot" style="background:#e0e0e0;border:1.5px solid #ccc"></span> Carry / rest day (excluded from log)</span>
+      </div>
+      <div class="chip-grid" id="chipGrid"></div>
+      <div class="chip-note">Carry and rest days are excluded from the printed log table.</div>
+    </div>
+
+    <!-- Action area -->
+    <div class="action-area">
+      <div class="workflow-hint">
+        <strong>Step 1:</strong> Fill in all required fields &nbsp;→&nbsp;
+        <strong>Step 2:</strong> Generate Log &nbsp;→&nbsp;
+        <strong>Step 3:</strong> Print &nbsp;·&nbsp; In the print dialog, turn <strong>OFF</strong> Headers and footers
+      </div>
+      <div class="btn-row">
+        <button class="btn-generate" onclick="generateLog()">Generate Log</button>
+        <button class="btn-print visible" id="printBtn" style="display:none" onclick="window.print()">⬡ Print Log</button>
+      </div>
+      <div class="preview-notice" id="previewNotice">
+        Log preview ready below. Review it, then click <strong>Print Log</strong>.
+      </div>
+    </div>
+
+  </div><!-- /card -->
+
+  <!-- ── Print Form (preview) ──────────────────────────────────────────────── -->
+  <div id="print-form">
+    <div class="print-form-inner">
+
+      <div class="form-header">
+        <div class="form-header-left">
+          <div class="form-title">Controlled Drug Substance — Daily Delivery Record</div>
+          <div class="form-regs">HPOA Bylaws Sch. E.14 · PODSA Bylaws s.35.1–35.6 · RS26-010</div>
+        </div>
+        <div class="form-header-right">
+          <div class="pharmacy-name" id="fPharmName">—</div>
+          <div class="pharmacy-contact" id="fPharmContact">—</div>
+        </div>
+      </div>
+
+      <div class="form-info-grid">
+        <div class="info-cell"><div class="info-label">Patient Name</div><div class="info-value" id="fPatName">—</div></div>
+        <div class="info-cell"><div class="info-label">Date of Birth</div><div class="info-value" id="fPatDOB">—</div></div>
+        <div class="info-cell"><div class="info-label">Rx Number</div><div class="info-value" id="fPatRx">—</div></div>
+        <div class="info-cell"><div class="info-label">Delivery Address</div><div class="info-value" id="fPatAddr">—</div></div>
+        <div class="info-cell"><div class="info-label">CDS / Dose</div><div class="info-value" id="fCDS">—</div></div>
+        <div class="info-cell"><div class="info-label">Prescription Period</div><div class="info-value" id="fPeriod">—</div></div>
+        <div class="info-cell"><div class="info-label">Witnessed Ingestion</div><div class="info-value" id="fWitness">—</div></div>
+        <div class="info-cell"><div class="info-label">Pharmacy Phone</div><div class="info-value" id="fPhone">—</div></div>
+      </div>
+
+      <div class="log-table-wrap">
+        <div class="log-table-title">Delivery Log</div>
+        <table class="log-table" id="logTable">
+          <thead id="logHead"></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+
+      <div class="form-footer">
+        <p>
+          <strong>Chain of custody:</strong> This record must be retained at the pharmacy for a minimum of 2 years. Any loss or theft of a CDS in transit must be reported to the College of Pharmacists of BC within 24 hours and to Health Canada within 10 business days (CDSA s.56; RS26-010 s.14).<br>
+          <strong>Delivery staff:</strong> Must hold a valid criminal record check, B.C. driving abstract (if applicable), and current OAT awareness training on file at the pharmacy (HPOA Sch. E.14 s.12; RS26-010 s.10–11).<br>
+          <strong>Undelivered doses:</strong> Record reason, return CDS to pharmacy, and notify the pharmacist on duty immediately.
+        </p>
+      </div>
+
+    </div>
   </div>
 
-</div>
+  <div class="page-footer">
+    Generated by Vireo Health CDS Delivery Log Generator &nbsp;·&nbsp; For compliance questions contact <a href="mailto:ramihanania@protonmail.com" style="color:#40916c">ramihanania@protonmail.com</a>
+  </div>
+
+</main>
 
 <script>
-  // ── State ────────────────────────────────────────────────────────────────
-  let allDates   = [];   // all dates in range as "YYYY-MM-DD"
-  let skipped    = new Set();
+// ── State ──────────────────────────────────────────────────────────────────
+let unit = 'mg';
+let witnessMode = 'all';
+let chips = []; // [{date: 'YYYY-MM-DD', label: 'Mon Jan 6', carry: false}]
 
-  // ── Date helpers ─────────────────────────────────────────────────────────
-  function buildDates() {
-    const s = document.getElementById('startDate').value;
-    const e = document.getElementById('endDate').value;
-    if (!s || !e || s > e) {
-      allDates = [];
-      skipped.clear();
-      document.getElementById('dateSelector').style.display = 'none';
-      render(); return;
-    }
-    const prev = new Set(allDates.filter(d => !skipped.has(d))); // preserve existing selections
-    skipped.clear();
-    allDates = [];
-    let cur = new Date(s + 'T00:00:00');
-    const end = new Date(e + 'T00:00:00');
-    while (cur <= end) {
-      allDates.push(cur.toISOString().slice(0,10));
-      cur.setDate(cur.getDate() + 1);
-    }
-    document.getElementById('dateSelector').style.display = 'block';
-    renderDateGrid();
-    render();
+// ── Unit toggle ────────────────────────────────────────────────────────────
+function setUnit(u) {
+  unit = u;
+  document.getElementById('unitMg').classList.toggle('active', u === 'mg');
+  document.getElementById('unitMl').classList.toggle('active', u === 'mL');
+}
+
+// ── Witness options ────────────────────────────────────────────────────────
+function updateWitness(radio) {
+  witnessMode = radio.value;
+  document.querySelectorAll('.witness-option').forEach(el => el.classList.remove('selected'));
+  radio.closest('.witness-option').classList.add('selected');
+}
+
+// ── Date chips ─────────────────────────────────────────────────────────────
+function buildChips() {
+  const s = document.getElementById('startDate').value;
+  const e = document.getElementById('endDate').value;
+  if (!s || !e || s > e) { document.getElementById('chipSection').style.display = 'none'; return; }
+
+  const start = new Date(s + 'T00:00:00');
+  const end   = new Date(e + 'T00:00:00');
+  chips = [];
+
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    const iso = d.toISOString().slice(0, 10);
+    const label = days[d.getDay()] + ' ' + months[d.getMonth()] + ' ' + d.getDate();
+    chips.push({ date: iso, label, carry: false });
   }
 
-  function renderDateGrid() {
-    const grid = document.getElementById('dateGrid');
-    grid.innerHTML = '';
-    allDates.forEach(d => {
-      const chip = document.createElement('div');
-      chip.className = 'date-chip' + (skipped.has(d) ? ' skipped' : '');
-      chip.textContent = fmtShort(d);
-      chip.title = fmtFull(d);
-      chip.onclick = () => { toggleDate(d); };
-      grid.appendChild(chip);
-    });
-    updateCount();
-  }
+  renderChips();
+  document.getElementById('chipSection').style.display = 'block';
+}
 
-  function toggleDate(d) {
-    if (skipped.has(d)) skipped.delete(d);
-    else skipped.add(d);
-    renderDateGrid();
-    render();
-  }
+function renderChips() {
+  const grid = document.getElementById('chipGrid');
+  grid.innerHTML = '';
+  chips.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'chip ' + (c.carry ? 'carry' : 'delivery');
+    el.textContent = c.label;
+    el.title = c.carry ? 'Click to restore as delivery day' : 'Click to mark as carry/rest day';
+    el.onclick = () => { chips[i].carry = !chips[i].carry; renderChips(); };
+    grid.appendChild(el);
+  });
+}
 
-  function updateCount() {
-    const active = allDates.filter(d => !skipped.has(d)).length;
-    const total  = allDates.length;
-    const skip   = skipped.size;
-    document.getElementById('dateCount').textContent =
-      `${active} delivery day${active !== 1 ? 's' : ''} · ${skip} carry/rest day${skip !== 1 ? 's' : ''} skipped`;
-  }
+// ── Format date for display ────────────────────────────────────────────────
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y, m, d] = iso.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[parseInt(m,10)-1] + ' ' + parseInt(d,10) + ', ' + y;
+}
 
-  function activeDates() { return allDates.filter(d => !skipped.has(d)); }
-
-  // ── Formatting ────────────────────────────────────────────────────────────
-  function fmtShort(iso) {
-    const [y,m,d] = iso.split('-');
-    const dt = new Date(+y, +m-1, +d);
-    return dt.toLocaleDateString('en-CA', { month:'short', day:'numeric' });
-  }
-  function fmtFull(iso) {
-    const [y,m,d] = iso.split('-');
-    const dt = new Date(+y, +m-1, +d);
-    return dt.toLocaleDateString('en-CA', { weekday:'short', year:'numeric', month:'short', day:'numeric' });
-  }
-  function fmtTableDate(iso) {
-    const [y,m,d] = iso.split('-');
-    const dt = new Date(+y, +m-1, +d);
-    return dt.toLocaleDateString('en-CA', { weekday:'short', month:'short', day:'numeric' });
-  }
-  function fmtDOB(iso) {
-    if (!iso) return '';
-    const [y,m,d] = iso.split('-');
-    return `${y}-${m}-${d}`;
-  }
-  function fmtDateRange() {
-    const s = document.getElementById('startDate').value;
-    const e = document.getElementById('endDate').value;
-    if (!s || !e) return '';
-    return fmtFull(s) + ' — ' + fmtFull(e);
-  }
-
-  // ── Main render ───────────────────────────────────────────────────────────
-  function v(id) { return document.getElementById(id).value.trim(); }
-  function chk(id) { return document.getElementById(id).checked; }
-
-  function render() {
-    const pharmName    = v('pharmName');
-    const pharmAddr    = v('pharmAddress');
-    const pharmPhone   = v('pharmPhone');
-    const patName      = v('patientName');
-    const patDOB       = v('patientDOB');
-    const delAddr      = v('deliveryAddress');
-    const cdsName      = v('cdsName');
-    const cdsDose      = v('cdsDose');
-    const wi           = chk('wiToggle');
-    const dates        = activeDates();
-    const printBtn     = document.getElementById('printBtn');
-
-    const hasMinimum = pharmName && patName && cdsName && cdsDose && dates.length > 0;
-    printBtn.disabled = !hasMinimum;
-
-    if (!pharmName && !patName && !cdsName) {
-      document.getElementById('formPaper').innerHTML = `
-        <div class="empty-state">
-          <div class="icon">📋</div>
-          <div>Fill in the setup panel to generate the delivery record.</div>
-        </div>`;
+// ── Generate Log ───────────────────────────────────────────────────────────
+function generateLog() {
+  // Validate required fields
+  const req = [
+    ['pharmName', 'Pharmacy Name'],
+    ['patName',   'Patient Name'],
+    ['patDOB',    'Date of Birth'],
+    ['patRx',     'Rx Number'],
+    ['patAddr',   'Delivery Address'],
+    ['cdsName',   'CDS Name'],
+    ['cdsDose',   'Daily Dose'],
+    ['startDate', 'Start Date'],
+    ['endDate',   'End Date'],
+  ];
+  for (const [id, label] of req) {
+    if (!document.getElementById(id).value.trim()) {
+      alert('Please fill in: ' + label);
+      document.getElementById(id).focus();
       return;
     }
-
-    // Table header columns
-    const wiCol = wi
-      ? `<th style="width:52px;">Witnessed<br>Ingestion<br>Time</th>`
-      : '';
-
-    // Table rows
-    const rows = dates.map((d, i) => {
-      const wiCell = wi ? `<td></td>` : '';
-      const shade = i % 2 === 1 ? ' style="background:#f8fcf9;"' : '';
-      return `
-        <tr>
-          <td class="td-date"${shade}>${fmtTableDate(d)}</td>
-          <td${shade}></td>
-          <td${shade}></td>
-          <td${shade}></td>
-          <td${shade}></td>
-          <td class="td-sig"${shade}></td>
-          <td class="td-check"${shade}>☐</td>
-          <td class="td-check"${shade}>☐</td>
-          ${wi ? `<td${shade}></td>` : ''}
-        </tr>`;
-    }).join('');
-
-    const wiBadge = wi
-      ? `<span class="wi-badge yes">WITNESSED INGESTION REQUIRED</span>`
-      : `<span class="wi-badge no">No witnessed ingestion</span>`;
-
-    const dateRange = fmtDateRange();
-
-    document.getElementById('formPaper').innerHTML = `
-
-      <!-- Header bar -->
-      <div class="form-header-bar">
-        <div class="form-title">Controlled Drug Substance — Daily Delivery Record</div>
-        <div class="form-ref">HPOA Bylaws Schedule E.14<br>PODSA Bylaws Part 8</div>
-      </div>
-
-      <!-- Pharmacy + patient info -->
-      <div class="info-grid">
-        <div class="info-cell header-cell">
-          <span class="lbl">Pharmacy</span>
-          <span class="val">${pharmName || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell header-cell">
-          <span class="lbl">Phone</span>
-          <span class="val">${pharmPhone || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell full header-cell">
-          <span class="lbl">Pharmacy Address</span>
-          <span class="val">${pharmAddr || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell">
-          <span class="lbl">Patient Name</span>
-          <span class="val">${patName || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell">
-          <span class="lbl">Date of Birth</span>
-          <span class="val">${fmtDOB(patDOB) || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell full">
-          <span class="lbl">Delivery Address</span>
-          <span class="val">${delAddr || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell">
-          <span class="lbl">Controlled Drug Substance</span>
-          <span class="val">${cdsName || '<em style="color:#bbb;">—</em>'}</span>
-        </div>
-        <div class="info-cell">
-          <span class="lbl">Dose</span>
-          <span class="val">${cdsDose || '<em style="color:#bbb;">—</em>'}
-            ${wiBadge}
-          </span>
-        </div>
-        <div class="info-cell full">
-          <span class="lbl">Prescription Period</span>
-          <span class="val">${dateRange || '<em style="color:#bbb;">—</em>'}
-            ${dates.length > 0 ? `<em style="font-size:10px;color:#666;font-weight:400;"> &nbsp;·&nbsp; ${dates.length} delivery day${dates.length !== 1 ? 's' : ''}</em>` : ''}
-          </span>
-        </div>
-      </div>
-
-      <!-- Delivery log table -->
-      ${dates.length === 0 ? `
-        <div style="text-align:center;padding:30px;color:#aaa;font-size:12px;border:1px dashed #ddd;border-radius:4px;">
-          Select a date range to generate the delivery log.
-        </div>` : `
-      <table class="log-table">
-        <thead>
-          <tr>
-            <th style="width:90px;text-align:left;padding-left:5px;">Date</th>
-            <th style="width:48px;">Time<br>Departed</th>
-            <th style="width:48px;">Time<br>Delivered</th>
-            <th style="width:38px;">Pharm.<br>Init.</th>
-            <th style="width:38px;">Driver<br>Init.</th>
-            <th style="min-width:130px;text-align:left;padding-left:4px;">Recipient Signature</th>
-            <th style="width:38px;">Del.<br>✓</th>
-            <th style="width:42px;">Undel.<br>✗</th>
-            ${wiCol}
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>`}
-
-      <!-- Footer -->
-      <div class="form-footer">
-        <p><strong>Driver:</strong> This completed form must be returned to the dispensing pharmacist by end of pharmacy operating hours on the day of each delivery. All undelivered CDS must also be returned by end of operating hours.</p>
-        <p style="margin-top:4px;"><strong>Regulatory basis:</strong> HPOA Bylaws Schedule E.14 (Practice Standards: Controlled Drug Substances Delivery) | PODSA Bylaws Part 8 | RS26-010. Pursuant to s.35.4 of the PODSA Bylaws and s.17 of Schedule E.14 of the HPOA Bylaws.</p>
-      </div>
-    `;
   }
+  if (chips.length === 0) { alert('Please enter a valid date range.'); return; }
 
-  // Init
-  render();
+  const deliveryDays = chips.filter(c => !c.carry);
+  if (deliveryDays.length === 0) { alert('All dates are marked as carry/rest days. Please restore at least one delivery day.'); return; }
+
+  // Populate header info
+  const pName   = document.getElementById('pharmName').value.trim();
+  const pPhone  = document.getElementById('pharmPhone').value.trim();
+  const pAddr   = document.getElementById('pharmAddr').value.trim();
+  const ptName  = document.getElementById('patName').value.trim();
+  const ptDOB   = document.getElementById('patDOB').value;
+  const ptRx    = document.getElementById('patRx').value.trim();
+  const ptAddr  = document.getElementById('patAddr').value.trim();
+  const cName   = document.getElementById('cdsName').value.trim();
+  const cDose   = document.getElementById('cdsDose').value.trim();
+  const sDate   = document.getElementById('startDate').value;
+  const eDate   = document.getElementById('endDate').value;
+
+  document.getElementById('fPharmName').textContent    = pName;
+  document.getElementById('fPharmContact').textContent = [pPhone, pAddr].filter(Boolean).join(' · ') || '—';
+  document.getElementById('fPatName').textContent      = ptName;
+  document.getElementById('fPatDOB').textContent       = fmtDate(ptDOB);
+  document.getElementById('fPatRx').textContent        = ptRx;
+  document.getElementById('fPatAddr').textContent      = ptAddr;
+  document.getElementById('fCDS').textContent          = cName + ' ' + cDose + ' ' + unit + ' / day';
+  document.getElementById('fPeriod').textContent       = fmtDate(sDate) + ' – ' + fmtDate(eDate);
+  document.getElementById('fPhone').textContent        = pPhone || '—';
+
+  const wLabels = { all: 'Required — all delivery days', some: 'Supervised days only', none: 'Not required' };
+  document.getElementById('fWitness').textContent = wLabels[witnessMode];
+
+  // Build table
+  const showWitness = witnessMode !== 'none';
+  const head = document.getElementById('logHead');
+  const body = document.getElementById('logBody');
+
+  head.innerHTML = '';
+  body.innerHTML = '';
+
+  const headers = [
+    'Date', 'Time Departed', 'Time Delivered',
+    'Pharm. Init.', 'Driver Init.',
+    'Recipient Signature', 'Delivered ✓', 'Undelivered ✗'
+  ];
+  if (showWitness) headers.push('Witnessed Ingestion Time');
+
+  const tr = document.createElement('tr');
+  headers.forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    tr.appendChild(th);
+  });
+  head.appendChild(tr);
+
+  deliveryDays.forEach(day => {
+    const tr = document.createElement('tr');
+    const cells = [
+      { text: day.label, cls: 'date-col' },
+      { text: '', cls: '' },
+      { text: '', cls: '' },
+      { text: '', cls: '' },
+      { text: '', cls: '' },
+      { text: '', cls: 'sig-cell' },
+      { text: '', cls: '' },
+      { text: '', cls: '' },
+    ];
+    if (showWitness) cells.push({ text: '', cls: 'witness-col' });
+
+    cells.forEach(c => {
+      const td = document.createElement('td');
+      td.textContent = c.text;
+      if (c.cls) td.className = c.cls;
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+
+  // Show print form + print button
+  document.getElementById('print-form').classList.add('visible');
+  document.getElementById('printBtn').style.display = 'inline-block';
+  document.getElementById('previewNotice').classList.add('visible');
+
+  // Scroll to preview
+  document.getElementById('print-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 </script>
 </body>
 </html>
